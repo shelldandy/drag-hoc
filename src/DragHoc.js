@@ -6,6 +6,7 @@ class DragHOC extends Component {
   state = {
     pressed: false,
     dragging: false,
+    dragDirection: null,
   }
 
   dragStart = event => {

@@ -39,6 +39,8 @@ body {
   width: 85%;
   margin: 0 auto;
   padding: 3em;
+  border: 0.4em dashed slategray;
+  cursor: grab;
 }
 
 @keyframes App-logo-spin {
