@@ -1,69 +1,96 @@
-import { Component, createRef } from 'react'
+import React, { Component, createRef } from 'react';
+import PropTypes from 'prop-types';
 
-class DragHOC extends Component {
-  dragRef = createRef()
+class Drag extends Component {
+	dragRef = createRef()
 
-  state = {
-    pressed: false,
-    dragging: false,
-    dragDirection: null,
-  }
+	state = {
+		startX: 0,
+		diffX: 0,
+		startY: 0,
+		diffY: 0,
+		dragging: false,
+		pressed: false,
+		dragDirection: null,
+	}
 
-  dragStart = event => {
-    event.preventDefault()
-    this.setState({ pressed: true })
-  }
+	dragStart = event => {
+		event.preventDefault();
+		const dragArea = this.dragRef.current;
+		const startX = event.pageX - dragArea.offsetLeft;
+		this.setState({
+			pressed: true,
+			startX,
+		});
+	}
 
-  dragEnd = event => {
-    event.preventDefault()
-    this.setState({ pressed: false })
-  }
+	dragMove = event => {
+		const {
+			pressed,
+			startX,
+		} = this.state;
+		if (! pressed) return;
 
-  listenDrags = dragArea => {
-    dragArea.addEventListener('mousedown', this.dragStart)
-    dragArea.addEventListener('touchstart', this.dragStart)
+		const dragArea = this.dragRef.current;
+		const endX = event.pageX - dragArea.offsetLeft;
+		const diffX = startX - endX;
 
-    dragArea.addEventListener('mouseup', this.dragEnd)
-    dragArea.addEventListener('touchend', this.dragEnd)
-    dragArea.addEventListener('mouseleave', this.dragEnd)
-  }
+		this.setState({
+			dragging: true,
+			diffX,
+		});
+	}
 
-  unlistenDrags = dragArea => {
-    dragArea.removeEventListener('mousedown', this.dragStart)
-    dragArea.removeEventListener('touchstart', this.dragStart)
+	dragEnd = event => {
+		event.preventDefault();
+		this.setState({
+			startX: 0,
+			startY: 0,
+			diffX: 0,
+			diffY: 0,
+			pressed: false,
+			dragging: false,
+			dragDirection: null,
+		});
+	}
 
-    dragArea.removeEventListener('mouseup', this.dragEnd)
-    dragArea.removeEventListener('touchend', this.dragEnd)
-    dragArea.removeEventListener('mouseleave', this.dragEnd)
-  }
+	render() {
+		const { children, noWrapper } = this.props;
+		const {
+			dragRef,
+			dragStart,
+			dragMove,
+			dragEnd,
+		} = this;
 
-  componentDidMount () {
-    const {
-      dragRef,
-      listenDrags,
-    } = this;
-    const dragArea = dragRef.current
-    listenDrags(dragArea)
-  }
+		const behaviorProps = {
+			role: 'presentation',
+			onMouseDown: dragStart,
+			onMouseMove: dragMove,
+			onMouseUp: dragEnd,
+			onMouseLeave: dragEnd,
+			onTouchStart: dragStart,
+			onTouchMove: dragMove,
+			onTouchEnd: dragEnd,
+			onTouchCancel: dragEnd,
+		};
 
-  componentWillUnmount () {
-    const {
-      dragRef,
-      unlistenDrags,
-    } = this;
-    const dragArea = dragRef.current
-    unlistenDrags(dragArea)
-  }
+		return noWrapper
+			? children({ ...this.state, dragRef, behaviorProps })
+			: (
+				<div { ...behaviorProps } ref={dragRef}>
+					{children({ ...this.state })}
+				</div>
+			);
+	}
 
-  render () {
-    const { children } = this.props
-    const { dragRef } = this
-    const passedProps = {
-      ...this.state,
-      dragRef,
-    }
-    return children({ ...passedProps })
-  }
+	static propTypes = {
+		children: PropTypes.func.isRequired,
+		noWrapper: PropTypes.bool,
+		dragX: PropTypes.func,
+		dragY: PropTypes.func,
+		threshold: PropTypes.number,
+	}
 }
 
-export default DragHOC
+export default Drag;

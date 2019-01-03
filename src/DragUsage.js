@@ -2,14 +2,15 @@ import React from 'react'
 import DragHOC from './DragHoc'
 
 const DragUsage = () => (
-  <DragHOC>
+  <DragHOC noWrapper>
     {({
       dragRef,
+      behaviorProps,
       dragging,
       pressed,
       dragDirection,
     }) => (
-      <div className="Drag-situation" ref={dragRef}>
+      <div className="Drag-situation" ref={dragRef} { ...behaviorProps }>
         <p>Pressed: { String(pressed) }</p>
         <p>Dragging: { String(dragging) }</p>
         <p>Drag Direction: { String(dragDirection) }</p>
