@@ -14,6 +14,12 @@ const initialState = {
 	dragDirectionY: 'NONE',
 };
 
+export const NONE = 'NONE';
+export const UP = 'UP';
+export const DOWN = 'DOWN';
+export const RIGHT = 'RIGHT';
+export const LEFT = 'LEFT';
+
 class Drag extends Component {
 	dragRef = createRef()
 
@@ -107,13 +113,13 @@ class Drag extends Component {
 
 	getDragDirection = ({ diffX, diffY }) => {
 		const NONE_X = diffX === 0;
-		const RIGHT = !NONE_X && diffX < 0;
+		const rightX = !NONE_X && diffX < 0;
 
 		const NONE_Y = diffY === 0;
-		const UP = !NONE_Y && diffY > 0;
+		const upY = !NONE_Y && diffY > 0;
 		return {
-			dragDirectionX: NONE_X ? 'NONE' : RIGHT ? 'RIGHT' : 'LEFT',
-			dragDirectionY: NONE_Y ? 'NONE' : UP ? 'UP' : 'DOWN',
+			dragDirectionX: NONE_X ? 'NONE' : rightX ? RIGHT : LEFT,
+			dragDirectionY: NONE_Y ? 'NONE' : upY ? UP : DOWN,
 		};
 	}
 
