@@ -20,10 +20,15 @@ class Drag extends Component {
 	state = initialState
 
 	dragStart = event => {
-		event.preventDefault();
+		if (! event.touches) event.preventDefault();
 		const dragArea = this.dragRef.current;
-		const startX = event.pageX - dragArea.offsetLeft;
-		const startY = event.pageY - dragArea.offsetTop;
+		const touchMode = !!event.touches;
+
+		const pageX = touchMode ? event.touches[0].pageX : event.pageX;
+		const pageY = touchMode ? event.touches[0].pageY : event.pageY;
+
+		const startX = pageX - dragArea.offsetLeft;
+		const startY = pageY - dragArea.offsetTop;
 		this.setState({
 			pressed: true,
 			startX,
@@ -38,8 +43,13 @@ class Drag extends Component {
 
 		if (! pressed) return;
 		const dragArea = this.dragRef.current;
-		const endX = event.pageX - dragArea.offsetLeft;
-		const endY = event.pageY - dragArea.offsetTop;
+		const touchMode = !!event.touches;
+
+		const pageX = touchMode ? event.touches[0].pageX : event.pageX;
+		const pageY = touchMode ? event.touches[0].pageY : event.pageY;
+
+		const endX = pageX - dragArea.offsetLeft;
+		const endY = pageY - dragArea.offsetTop;
 		const diffX = startX - endX;
 		const diffY = startY - endY;
 
@@ -68,7 +78,7 @@ class Drag extends Component {
 	}
 
 	dragEnd = event => {
-		event.preventDefault();
+		if (! event.touches) event.preventDefault();
 		this.resetState();
 	}
 
