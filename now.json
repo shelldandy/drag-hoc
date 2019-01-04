@@ -1,5 +1,14 @@
 {
   "name": "drag-hoc",
   "alias": "drag-hoc.now.sh",
-  "version": 2
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@now/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ]
 }
