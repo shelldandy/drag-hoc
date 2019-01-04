@@ -43,6 +43,10 @@ body {
   cursor: grab;
 }
 
+.Drag-situation:active {
+  cursor: grabbing;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

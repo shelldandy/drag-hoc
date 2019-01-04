@@ -1,66 +1,117 @@
 import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 
+const initialState = {
+	startX: 0,
+	diffX: 0,
+	startY: 0,
+	diffY: 0,
+	dragging: false,
+	pressed: false,
+	enoughX: false,
+	enoughY: false,
+	dragDirectionX: 'NONE',
+	dragDirectionY: 'NONE',
+};
+
 class Drag extends Component {
 	dragRef = createRef()
 
-	state = {
-		startX: 0,
-		diffX: 0,
-		startY: 0,
-		diffY: 0,
-		dragging: false,
-		pressed: false,
-		dragDirection: null,
-	}
+	state = initialState
 
 	dragStart = event => {
 		event.preventDefault();
 		const dragArea = this.dragRef.current;
 		const startX = event.pageX - dragArea.offsetLeft;
+		const startY = event.pageY - dragArea.offsetTop;
 		this.setState({
 			pressed: true,
 			startX,
+			startY,
 		});
 	}
 
 	dragMove = event => {
-		const {
-			pressed,
-			startX,
-		} = this.state;
-		if (! pressed) return;
+		const { pressed, startX, startY } = this.state;
+		const { hasBeenDraggedEnough, getDragDirection } = this;
+		const { horizontalCallback, verticalCallback} = this.props;
 
+		if (! pressed) return;
 		const dragArea = this.dragRef.current;
 		const endX = event.pageX - dragArea.offsetLeft;
+		const endY = event.pageY - dragArea.offsetTop;
 		const diffX = startX - endX;
+		const diffY = startY - endY;
 
-		this.setState({
+		const { enoughX, enoughY } = hasBeenDraggedEnough({ dragArea, diffX, diffY });
+		const { dragDirectionX, dragDirectionY } = getDragDirection({ diffX, diffY });
+
+		if (horizontalCallback && enoughX) {
+			horizontalCallback(dragDirectionX);
+			return this.resetState();
+		}
+
+		if (verticalCallback && enoughY) {
+			verticalCallback(dragDirectionY);
+			return this.resetState();
+		}
+
+		return this.setState({
 			dragging: true,
 			diffX,
+			dragDirectionX,
+			enoughX,
+			diffY,
+			dragDirectionY,
+			enoughY,
 		});
 	}
 
 	dragEnd = event => {
 		event.preventDefault();
-		this.setState({
-			startX: 0,
-			startY: 0,
-			diffX: 0,
-			diffY: 0,
-			pressed: false,
-			dragging: false,
-			dragDirection: null,
-		});
+		this.resetState();
+	}
+
+	resetState = () => {
+		this.setState(initialState);
+	}
+
+	getAreaSize = dragArea => {
+		const rect = dragArea.getBoundingClientRect();
+		return {
+			width: rect.width,
+			height: rect.height,
+		};
+	}
+
+	hasBeenDraggedEnough = ({ dragArea, diffX, diffY }) => {
+		const { threshold } = this.props;
+		const { width, height } = this.getAreaSize(dragArea);
+		const minDragX = width * threshold;
+		const minDragY = height * threshold;
+		return {
+			enoughX: Math.abs(diffX) > minDragX,
+			enoughY: Math.abs(diffY) > minDragY
+		}
+	}
+
+	getDragDirection = ({ diffX, diffY }) => {
+		const NONE_X = diffX === 0;
+		const RIGHT = !NONE_X && diffX < 0;
+
+		const NONE_Y = diffY === 0;
+		const UP = !NONE_Y && diffY > 0;
+		return {
+			dragDirectionX: NONE_X ? 'NONE' : RIGHT ? 'RIGHT' : 'LEFT',
+			dragDirectionY: NONE_Y ? 'NONE' : UP ? 'UP' : 'DOWN',
+		};
 	}
 
 	render() {
 		const { children, noWrapper } = this.props;
 		const {
-			dragRef,
-			dragStart,
-			dragMove,
-			dragEnd,
+			dragRef, dragStart,
+			dragMove, dragEnd,
 		} = this;
 
 		const behaviorProps = {
@@ -87,9 +138,13 @@ class Drag extends Component {
 	static propTypes = {
 		children: PropTypes.func.isRequired,
 		noWrapper: PropTypes.bool,
-		dragX: PropTypes.func,
-		dragY: PropTypes.func,
+		horizontalCallback: PropTypes.func,
+		verticalCallback: PropTypes.func,
 		threshold: PropTypes.number,
+	}
+
+	static defaultProps = {
+		threshold: 0.20
 	}
 }
 
