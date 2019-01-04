@@ -43,6 +43,7 @@ class Drag extends Component {
 	}
 
 	dragMove = event => {
+		event.preventDefault();
 		const { pressed, startX, startY } = this.state;
 		const { hasBeenDraggedEnough, getDragDirection } = this;
 		const { horizontalCallback, verticalCallback} = this.props;
