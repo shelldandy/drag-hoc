@@ -1,6 +1,12 @@
 import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 
+export const NONE = 'NONE';
+export const UP = 'UP';
+export const DOWN = 'DOWN';
+export const RIGHT = 'RIGHT';
+export const LEFT = 'LEFT';
+
 const initialState = {
 	startX: 0,
 	diffX: 0,
@@ -10,15 +16,9 @@ const initialState = {
 	pressed: false,
 	enoughX: false,
 	enoughY: false,
-	dragDirectionX: 'NONE',
-	dragDirectionY: 'NONE',
+	dragDirectionX: NONE,
+	dragDirectionY: NONE,
 };
-
-export const NONE = 'NONE';
-export const UP = 'UP';
-export const DOWN = 'DOWN';
-export const RIGHT = 'RIGHT';
-export const LEFT = 'LEFT';
 
 class Drag extends Component {
 	dragRef = createRef()
@@ -118,8 +118,8 @@ class Drag extends Component {
 		const NONE_Y = diffY === 0;
 		const upY = !NONE_Y && diffY > 0;
 		return {
-			dragDirectionX: NONE_X ? 'NONE' : rightX ? RIGHT : LEFT,
-			dragDirectionY: NONE_Y ? 'NONE' : upY ? UP : DOWN,
+			dragDirectionX: NONE_X ? NONE : rightX ? RIGHT : LEFT,
+			dragDirectionY: NONE_Y ? NONE : upY ? UP : DOWN,
 		};
 	}
 
